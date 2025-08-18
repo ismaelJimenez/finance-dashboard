@@ -192,10 +192,11 @@ jobs:
       - name: Deploy Qt Libraries (Windows)
         if: runner.os == 'Windows'
         run: |
-          $qtDir = "$env:Qt6_DIR\..\..\..\bin"
+          $qtDir = "$env:QT_ROOT_DIR\bin"
           $deployTool = "$qtDir\windeployqt.exe"
           $appPath = "build\src\qt6_sample\${{matrix.build_type}}\qt6_hello_world.exe"
           if (Test-Path $appPath) {
+            New-Item -ItemType Directory -Path "build\src\qt6_sample\${{matrix.build_type}}\deploy" -Force
             & $deployTool $appPath --dir "build\src\qt6_sample\${{matrix.build_type}}\deploy"
             Copy-Item $appPath "build\src\qt6_sample\${{matrix.build_type}}\deploy\"
           }
