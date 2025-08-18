@@ -166,6 +166,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-tools-dev-tools
 
+      - name: Install Qt6 (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install qt6
+
+      - name: Install Qt6 (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install qt6-base-dev
+
       - name: Configure CMake
         run: |
           cmake -S . -B ./build -G "${{matrix.generator}}" -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} -DGIT_SHA:STRING=${{ github.sha }}
