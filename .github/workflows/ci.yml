@@ -243,6 +243,9 @@ jobs:
           
           echo "Found .app bundle at: $appPath"
           macdeployqt "$appPath"
+          
+          # Sign the app bundle to avoid "damaged" warnings on download
+          codesign --force --deep --sign - "$appPath" || echo "Code signing failed, app may show security warnings"
 
       - name: Debug - List build files
         if: runner.os == 'Linux'
