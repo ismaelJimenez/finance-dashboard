@@ -208,19 +208,37 @@ jobs:
             macdeployqt build/src/qt6_sample/qt6_hello_world.app
           fi
 
+      - name: Debug - List build files
+        if: runner.os == 'Linux'
+        run: |
+          echo "Contents of build/src/qt6_sample/:"
+          ls -la build/src/qt6_sample/ || echo "Directory not found"
+          find build -name "qt6_hello_world*" -type f || echo "No qt6_hello_world files found"
+
       - name: Deploy Qt Libraries (Linux)
         if: runner.os == 'Linux'
         run: |
+          # Look for executable in different possible locations
           if [ -f "build/src/qt6_sample/qt6_hello_world" ]; then
-            mkdir -p build/src/qt6_sample/deploy/lib
-            cp build/src/qt6_sample/qt6_hello_world build/src/qt6_sample/deploy/
-            ldd build/src/qt6_sample/qt6_hello_world | grep Qt | awk '{print $3}' | xargs -I {} cp {} build/src/qt6_sample/deploy/lib/
-            echo '#!/bin/bash' > build/src/qt6_sample/deploy/qt6_hello_world.sh
-            echo 'cd "$(dirname "$0")"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
-            echo 'export LD_LIBRARY_PATH="./lib:$LD_LIBRARY_PATH"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
-            echo './qt6_hello_world "$@"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
-            chmod +x build/src/qt6_sample/deploy/qt6_hello_world.sh
+            execPath="build/src/qt6_sample/qt6_hello_world"
+          elif [ -f "build/src/qt6_sample/Release/qt6_hello_world" ]; then
+            execPath="build/src/qt6_sample/Release/qt6_hello_world"
+          elif [ -f "build/src/qt6_sample/Debug/qt6_hello_world" ]; then
+            execPath="build/src/qt6_sample/Debug/qt6_hello_world"
+          else
+            echo "No qt6_hello_world executable found"
+            exit 1
           fi
+          
+          echo "Found executable at: $execPath"
+          mkdir -p build/src/qt6_sample/deploy/lib
+          cp "$execPath" build/src/qt6_sample/deploy/
+          ldd "$execPath" | grep Qt | awk '{print $3}' | xargs -I {} cp {} build/src/qt6_sample/deploy/lib/ || true
+          echo '#!/bin/bash' > build/src/qt6_sample/deploy/qt6_hello_world.sh
+          echo 'cd "$(dirname "$0")"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
+          echo 'export LD_LIBRARY_PATH="./lib:$LD_LIBRARY_PATH"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
+          echo './qt6_hello_world "$@"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
+          chmod +x build/src/qt6_sample/deploy/qt6_hello_world.sh
 
       - name: Upload Artifacts (Linux)
         if: matrix.build_type == 'Release' && matrix.packaging_maintainer_mode == 'OFF' && runner.os == 'Linux'
