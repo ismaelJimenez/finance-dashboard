@@ -232,7 +232,10 @@ jobs:
           macdeployqt "$appPath"
           
           # Sign the app bundle to avoid "damaged" warnings on download
-          codesign --force --deep --sign - "$appPath" || echo "Code signing failed, app may show security warnings"
+          codesign --force --deep --sign - --options runtime "$appPath" || echo "Code signing failed, app may show security warnings"
+          
+          # Remove quarantine attribute to reduce security warnings
+          xattr -d com.apple.quarantine "$appPath" 2>/dev/null || echo "No quarantine attribute to remove"
 
       - name: Debug - List build files
         if: runner.os == 'Linux'
