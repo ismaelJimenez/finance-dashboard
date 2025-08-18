@@ -53,6 +53,9 @@ jobs:
           # mingw is determined by this author to be too buggy to support
           - os: windows-latest
             compiler: gcc-14
+          # GCC 14 has incompatibility with macOS 15 SDK (_bounds.h missing)
+          - os: macos-15
+            compiler: gcc-14
 
         include:
           # Add appropriate variables for gcov version required. This will intentionally break
@@ -181,22 +184,6 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2019_64'
 
-      - name: Fix GCC macOS 15 compatibility
-        if: runner.os == 'macOS' && contains(matrix.compiler, 'gcc') && contains(matrix.os, '15')
-        run: |
-          # Check available SDKs and use the oldest available
-          echo "Available SDKs:"
-          ls /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/
-          # Use an older SDK if available, otherwise disable the problematic flags
-          if [ -d "/Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk" ]; then
-            SDK_PATH="/Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk"
-          elif [ -d "/Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk" ]; then
-            SDK_PATH="/Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
-            # Disable the problematic include-fixed directory
-            echo "CMAKE_C_FLAGS=-Wno-error -nostdinc -I/usr/include" >> $GITHUB_ENV
-            echo "CMAKE_CXX_FLAGS=-Wno-error -nostdinc++ -I$(brew --prefix gcc@14)/include/c++/14 -I$(brew --prefix gcc@14)/include/c++/14/aarch64-apple-darwin24 -I/usr/include" >> $GITHUB_ENV
-          fi
-          echo "Using SDK: $SDK_PATH"
 
       - name: Configure CMake
         run: |
