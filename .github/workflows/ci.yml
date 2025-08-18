@@ -223,12 +223,15 @@ jobs:
           fi
 
       - name: Upload Artifacts
+        if: matrix.build_type == 'Release' && matrix.packaging_maintainer_mode == 'OFF'
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-${{ matrix.packaging_maintainer_mode }}-binaries
+          name: ${{ runner.os }}-${{ matrix.compiler }}-Release-binaries
           path: |
             build/src/qt6_sample/qt6_hello_world.app
-            build/src/qt6_sample/Debug/deploy/
+            build/src/qt6_sample/qt6_hello_world
+            build/src/qt6_sample/qt6_hello_world.exe
+            build/src/qt6_sample/Release/qt6_hello_world.exe
             build/src/qt6_sample/Release/deploy/
             build/src/qt6_sample/deploy/
           retention-days: 30

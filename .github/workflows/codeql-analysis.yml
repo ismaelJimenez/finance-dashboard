@@ -81,6 +81,11 @@ jobs:
         gcovr: false
         opencppcoverage: false
 
+    - name: Install Qt6 (Ubuntu)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y qt6-base-dev qt6-tools-dev qt6-tools-dev-tools
+
       # make sure coverage is only enabled for Debug builds, since it sets -O0 to make sure coverage
       # has meaningful results
     - name: Configure CMake
