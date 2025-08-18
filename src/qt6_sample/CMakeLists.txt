@@ -15,6 +15,11 @@ target_link_libraries(
   qt6_hello_world
   PRIVATE Qt6::Widgets)
 
+# Set compile definitions and include directories for clang-tidy
+target_compile_definitions(qt6_hello_world PRIVATE QT_WIDGETS_LIB)
+get_target_property(QT6_WIDGETS_INCLUDE_DIRS Qt6::Widgets INTERFACE_INCLUDE_DIRECTORIES)
+target_include_directories(qt6_hello_world PRIVATE ${QT6_WIDGETS_INCLUDE_DIRS})
+
 set_target_properties(qt6_hello_world PROPERTIES
     WIN32_EXECUTABLE ON
     MACOSX_BUNDLE ON

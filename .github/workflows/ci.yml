@@ -189,6 +189,50 @@ jobs:
         run: |
           cmake --build ./build --config ${{matrix.build_type}}
 
+      - name: Deploy Qt Libraries (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $qtDir = "$env:Qt6_DIR\..\..\..\bin"
+          $deployTool = "$qtDir\windeployqt.exe"
+          $appPath = "build\src\qt6_sample\${{matrix.build_type}}\qt6_hello_world.exe"
+          if (Test-Path $appPath) {
+            & $deployTool $appPath --dir "build\src\qt6_sample\${{matrix.build_type}}\deploy"
+            Copy-Item $appPath "build\src\qt6_sample\${{matrix.build_type}}\deploy\"
+          }
+
+      - name: Deploy Qt Libraries (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          if [ -d "build/src/qt6_sample/qt6_hello_world.app" ]; then
+            macdeployqt build/src/qt6_sample/qt6_hello_world.app
+          fi
+
+      - name: Deploy Qt Libraries (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          if [ -f "build/src/qt6_sample/qt6_hello_world" ]; then
+            mkdir -p build/src/qt6_sample/deploy/lib
+            cp build/src/qt6_sample/qt6_hello_world build/src/qt6_sample/deploy/
+            ldd build/src/qt6_sample/qt6_hello_world | grep Qt | awk '{print $3}' | xargs -I {} cp {} build/src/qt6_sample/deploy/lib/
+            echo '#!/bin/bash' > build/src/qt6_sample/deploy/qt6_hello_world.sh
+            echo 'cd "$(dirname "$0")"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
+            echo 'export LD_LIBRARY_PATH="./lib:$LD_LIBRARY_PATH"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
+            echo './qt6_hello_world "$@"' >> build/src/qt6_sample/deploy/qt6_hello_world.sh
+            chmod +x build/src/qt6_sample/deploy/qt6_hello_world.sh
+          fi
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}-${{ matrix.compiler }}-${{ matrix.build_type }}-binaries
+          path: |
+            build/src/qt6_sample/qt6_hello_world.app
+            build/src/qt6_sample/Debug/deploy/
+            build/src/qt6_sample/Release/deploy/
+            build/src/qt6_sample/deploy/
+          retention-days: 30
+          if-no-files-found: warn
+
       - name: Unix - Test and coverage
         if: runner.os != 'Windows'
         working-directory: ./build
