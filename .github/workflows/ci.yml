@@ -181,6 +181,12 @@ jobs:
           target: 'desktop'
           arch: 'win64_msvc2019_64'
 
+      - name: Fix GCC macOS 15 compatibility
+        if: runner.os == 'macOS' && contains(matrix.compiler, 'gcc') && contains(matrix.os, '15')
+        run: |
+          echo "CPPFLAGS=-nostdinc++ -I$(brew --prefix gcc@14)/include/c++/14 -I$(brew --prefix gcc@14)/include/c++/14/aarch64-apple-darwin24" >> $GITHUB_ENV
+          echo "CXXFLAGS=-nostdinc++ -I$(brew --prefix gcc@14)/include/c++/14 -I$(brew --prefix gcc@14)/include/c++/14/aarch64-apple-darwin24" >> $GITHUB_ENV
+
       - name: Configure CMake
         run: |
           cmake -S . -B ./build -G "${{matrix.generator}}" -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} -DGIT_SHA:STRING=${{ github.sha }}
