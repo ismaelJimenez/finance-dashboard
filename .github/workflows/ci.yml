@@ -184,8 +184,9 @@ jobs:
       - name: Fix GCC macOS 15 compatibility
         if: runner.os == 'macOS' && contains(matrix.compiler, 'gcc') && contains(matrix.os, '15')
         run: |
-          echo "CPPFLAGS=-nostdinc++ -I$(brew --prefix gcc@14)/include/c++/14 -I$(brew --prefix gcc@14)/include/c++/14/aarch64-apple-darwin24" >> $GITHUB_ENV
-          echo "CXXFLAGS=-nostdinc++ -I$(brew --prefix gcc@14)/include/c++/14 -I$(brew --prefix gcc@14)/include/c++/14/aarch64-apple-darwin24" >> $GITHUB_ENV
+          echo "CMAKE_C_FLAGS=-Wno-error -isysroot /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk" >> $GITHUB_ENV
+          echo "CMAKE_CXX_FLAGS=-Wno-error -isysroot /Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk" >> $GITHUB_ENV
+          echo "SDKROOT=/Applications/Xcode_16.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.5.sdk" >> $GITHUB_ENV
 
       - name: Configure CMake
         run: |
