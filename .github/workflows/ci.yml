@@ -32,6 +32,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
+          - macos-15
           - windows-latest
         compiler:
           # you can specify the version after `-` like "llvm-15.0.2".
