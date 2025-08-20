@@ -13,6 +13,8 @@ env:
   CLANG_TIDY_VERSION: "19.1.1"
   VERBOSE: 1
 
+permissions:
+  contents: write
 
 jobs:
   Test:
