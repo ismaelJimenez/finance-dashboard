@@ -71,6 +71,12 @@ jobs:
           - os: macos-latest
             enable_ipo: Off
 
+          - os: macos-latest
+            build_type: Release
+            packaging_maintainer_mode: On
+            package_generator: DragNDrop
+            enable_ipo: Off
+
           # Set up preferred package generators, for given build configurations
           - build_type: Release
             packaging_maintainer_mode: On
